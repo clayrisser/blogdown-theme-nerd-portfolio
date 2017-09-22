@@ -1,0 +1,191 @@
+<dom-module id="theme-body">
+  <template>
+    <style>
+      :host {
+        width: 100%;
+        height: 100vh;
+      }
+      #toastError {
+        --paper-toast-background-color: red;
+      }
+      #toastWarn {
+        --paper-toast-background-color: orange;
+      }
+      #toastInfo {
+        --paper-toast-background-color: green;
+      }
+    </style>
+    <style include="iron-positioning"></style>
+
+    <div class="content">
+      <blogdown-content></blogdown-content>
+    </div>
+
+    <div class="toast-hide" on-click="hideToast">
+      <paper-toast id="toastInfo" class="toast" text="[[notification.message]]" duration="[[themeSettings.toastDuration]]"></paper-toast>
+      <paper-toast id="toastWarn" class="toast" text="[[notification.message]]" duration="[[themeSettings.toastDuration]]"></paper-toast>
+      <paper-toast id="toastError" class="toast" text="[[notification.message]]" duration="[[themeSettings.toastDuration]]"></paper-toast>
+    </div>
+
+  </template>
+  <script>
+    class ThemeBody {
+      beforeRegister() {
+        this.is = 'theme-body';
+
+        this.actions = {
+          isNarrow: (narrow) => {
+            return (dispatch) => {
+              dispatch({
+                type: IS_NARROW,
+                payload: narrow
+              });
+            };
+          }
+        };
+
+        this.properties = {
+          metaLoading: {
+            type: Array,
+            statePath: 'meta.loading',
+            observer: 'progressChanged'
+          },
+          metaProgress: {
+            type: Number,
+            statePath: 'meta.progress',
+            observer: 'progressChanged'
+          },
+          notifications: {
+            type: Array,
+            statePath: 'notifications',
+            observer: 'notificationsChanged'
+          },
+          meta: {
+            type: Object,
+            statePath: 'meta'
+          },
+          pages: {
+            type: [],
+            statePath: 'pages'
+          },
+          settings: {
+            type: Object,
+            statePath: 'settings'
+          },
+          meta: {
+            type: Object,
+            statePath: 'meta'
+          },
+          narrow: {
+            type: Boolean,
+            observer: 'narrowChanged'
+          },
+          animationConfig: {
+            value: function() {
+              return {
+                entry: {
+                  name: 'scale-up-animation',
+                  node: this
+                },
+                exit: {
+                  name: 'fade-out-animation',
+                  node: this
+                }
+              };
+            }
+          }
+        };
+      }
+
+      get behaviors() {
+        return [
+          BodyBehavior,
+          Polymer.NeonAnimationRunnerBehavior,
+          ReduxActionsBehavior,
+          ReduxStateBehavior
+        ];
+      }
+
+      ready() {
+        this.set('themeSettings', _.assign({
+          toastDuration: 5000
+        }, app.getThemeSettings()));
+        this.set('indeterminateLoading', true);
+        this.set('socialAccounts', []);
+        this.set('menuItems', []);
+        this.loadMenuItems();
+        this.loadSocialAccounts();
+      }
+
+      loadMenuItems() {
+        _.each(this.pages, (page) => {
+          if (page.addToMenu) {
+            this.push('menuItems', {
+              title: page.title,
+              slug: page.slug
+            });
+          }
+        });
+      }
+
+      loadSocialAccounts() {
+        _.each(this.themeSettings.socialAccounts, (socialAccount, key) => {
+          this.push('socialAccounts', {
+            type: key,
+            url: socialAccount
+          });
+        });
+      }
+
+      toggleDrawer() {
+        this.$.drawer.toggle();
+      }
+
+      closeDrawer() {
+        if (this.narrow) this.$.drawer.close();
+      }
+
+      narrowChanged() {
+        this.dispatch('isNarrow', this.narrow);
+      }
+
+      notificationsChanged() {
+        this.hideToast();
+        if (this.meta && this.meta.appLoaded) {
+          this.set('notification', this.notifications[this.notifications.length - 1]);
+          switch (this.notification.type) {
+            case 'error':
+              this.$.toastError.open();
+              break;
+            case 'warn':
+              this.$.toastWarn.open();
+              break;
+            default:
+              this.$.toastInfo.open();
+              break;
+          }
+        }
+      }
+
+      hideToast() {
+        this.$.toastError.close();
+        this.$.toastWarn.close();
+        this.$.toastInfo.close();
+      }
+
+      progressChanged() {
+        if (this.metaLoading.length > 0) {
+          this.set('loading', true);
+          this.set('progress', 0);
+        } else if (this.metaProgress > 0) {
+          this.set('loading', false);
+          this.set('progress', this.metaProgress);
+        } else {
+          this.set('loading', false);
+          this.set('progress', 0);
+        }
+      }
+    }
+    Polymer(ThemeBody);
+  </script>
+</dom-module>

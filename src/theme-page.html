@@ -1,0 +1,72 @@
+<dom-module id="theme-page">
+  <template>
+    <style>
+      :host {
+        display: none;
+        width: 100%;
+      }
+      .title {
+        padding: 10px 40px 0px 40px;
+      }
+      .content {
+        padding: 0px 20px;
+      }
+    </style>
+
+    <div class="title">
+      <h1>[[page.title]]</h1>
+    </div>
+
+    <div class="content">
+      <blogdown-render page="[[page]]"></blogdown-render>
+    </div>
+
+  </template>
+  <script>
+    class ThemePage {
+      beforeRegister() {
+        this.is = 'theme-page';
+
+        this.properties = {
+          page: {
+            type: Object,
+            value: {}
+          },
+          settings: {
+            type: Object,
+            statePath: 'settings'
+          },
+          animationConfig: {
+            value: function() {
+              const themeSettings = app.getThemeSettings();
+              return {
+                entry: {
+                  name: themeSettings.pageTransition || 'scale-up-animation',
+                  node: this
+                }
+              }
+            }
+          }
+        };
+      }
+
+      get behaviors() {
+        return [
+          PageBehavior,
+          ReduxStateBehavior,
+          Polymer.NeonAnimationRunnerBehavior
+        ];
+      }
+
+      ready() {
+        if (this.page.slug === 'home') this.set('page.title', this.settings.title);
+      }
+
+      attached() {
+        this.set('style.display', 'inline-block');
+        this.playAnimation('entry');
+      }
+    }
+    Polymer(ThemePage);
+  </script>
+</dom-module>

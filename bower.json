@@ -1,0 +1,25 @@
+{
+  "name": "blogdown-theme-blogdown2017",
+  "homepage": "https://github.com/thingdown/blogdown-theme-blogdown2017",
+  "authors": [
+    "Jam Risser <jam@jamrizzi.com>"
+  ],
+  "description": "The official 2017 BlogDown theme",
+  "main": "./src/theme.html",
+  "keywords": [
+    "blogdown",
+    "theme"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "type-writer": "^0.1.5"
+  }
+}

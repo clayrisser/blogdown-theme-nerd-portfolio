@@ -1,0 +1,96 @@
+<dom-module id="page-home">
+  <template>
+    <style>
+      :host {
+        display: none;
+      }
+      .title {
+        padding: 10px 40px 0px 40px;
+      }
+      .content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: calc(100vh - 140px);
+        padding: 0px 20px;
+      }
+      .menu-item a {
+        color: var(--primary-text-color)
+      }
+    </style>
+    <style include="iron-positioning"></style>
+
+    <div class="title">
+      <h1>[[settings.title]]</h1>
+    </div>
+
+    <div class="content">
+      <div class="menu-items">
+        <template is="dom-repeat" items="[[menuItems]]" as="menuItem">
+          <div class="menu-item">
+            <h2>
+              <a href="/[[menuItem.slug]]">
+                <type-writer delay="1000" text="[[menuItem.title]]" speed="80" cursor-duration="3000"></type-writer>
+              </a>
+            </h2>
+          </div>
+        </template>
+      </div>
+    </div class="content">
+
+  </template>
+  <script>
+    Polymer({
+      is: 'page-home',
+
+      properties: {
+        pages: {
+          type: Array,
+          statePath: 'pages'
+        },
+        settings: {
+          type: Object,
+          statePath: 'settings'
+        },
+        animationConfig: {
+          value: function() {
+            const themeSettings = app.getThemeSettings();
+            return {
+              entry: {
+                name: themeSettings.pageTransition || 'scale-up-animation',
+                node: this
+              }
+            }
+          }
+        }
+      },
+
+      behaviors: [
+        ReduxStateBehavior,
+        Polymer.NeonAnimationRunnerBehavior,
+      ],
+
+      ready: function() {
+        this.set('menuItems', this.getMenuItems());
+      },
+
+      attached:  function() {
+        this.style.display = 'inline';
+        this.playAnimation('entry');
+      },
+
+      getMenuItems: function() {
+        var menuItems = [];
+        _.each(this.pages, (page) => {
+          if (page.addToMenu) {
+            menuItems.push({
+              title: page.title,
+              slug: page.slug
+            });
+          }
+        });
+        return menuItems;
+      }
+    });
+  </script>
+</dom-module>

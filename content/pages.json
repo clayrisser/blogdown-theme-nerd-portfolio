@@ -1,0 +1,16 @@
+[
+  {
+    "title": "Home",
+    "slug": "home",
+    "format": "html",
+    "addToMenu": false,
+    "display": "viewport",
+    "featuredImage": false
+  },
+  {
+    "title": "Another page"
+  },
+  {
+    "title": "A third page"
+  }
+]

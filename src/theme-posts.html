@@ -1,0 +1,97 @@
+<dom-module id="theme-posts">
+  <template>
+    <style>
+      :host {
+        display: none;
+        width: 100%;
+      }
+      .title {
+        padding: 10px 40px 0px 40px;
+      }
+      .content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: calc(100vh - 140px);
+        padding: 0px 20px;
+      }
+      .posts a {
+        color: var(--primary-text-color)
+      }
+    </style>
+
+    <div class="title">
+      <h1>[[page.title]]</h1>
+    </div>
+
+    <div class="content">
+      <div class="posts">
+        <template is="dom-repeat" items="[[posts]]" as="post" restamp>
+          <div class="post">
+            <h2>
+              <a href="/[[page.slug]]/[[post.slug]]">
+                <type-writer delay="1000" text="[[post.title]]" speed="80" cursor-duration="3000"></type-writer>
+              </a>
+            </h2>
+          </div>
+        </template>
+      </div>
+    </div>
+
+  </template>
+  <script>
+    class ThemePosts {
+      beforeRegister() {
+        this.is = 'theme-posts';
+
+        this.properties = {
+          authors: {
+            type: Object,
+            statePath: 'authors'
+          },
+          settings: {
+            type: Object,
+            statePath: 'settings'
+          },
+          animationConfig: {
+            value: function() {
+              const themeSettings = app.getThemeSettings();
+              return {
+                entry: {
+                  name: themeSettings.pageTransition || 'scale-up-animation',
+                  node: this
+                }
+              }
+            }
+          }
+        };
+      }
+
+      get behaviors() {
+        return [
+          PostsBehavior,
+          Polymer.NeonAnimationRunnerBehavior,
+          ReduxStateBehavior
+        ];
+      }
+
+      attached() {
+        this.style.display = 'inline';
+        this.playAnimation('entry');
+      }
+
+      flexDirection(i) {
+        return i % 2 === 0 ? '-reverse' : '';
+      }
+
+      getAuthorDisplayName(author) {
+        return author ? this.authors[author].displayName : '';
+      }
+
+      getDate(date) {
+        return date ? date.format(this.settings.dateFormat) : '';
+      }
+    }
+    Polymer(ThemePosts);
+  </script>
+</dom-module>
