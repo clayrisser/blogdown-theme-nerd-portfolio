@@ -14,6 +14,10 @@
         height: calc(100vh - 140px);
         padding: 0px 20px;
       }
+      .menu-items {
+        display: flex;
+        justify-content: center;
+      }
       .menu-item a {
         color: var(--primary-text-color)
       }
@@ -25,16 +29,23 @@
     </div>
 
     <div class="content">
-      <div class="menu-items">
-        <template is="dom-repeat" items="[[menuItems]]" as="menuItem">
-          <div class="menu-item">
-            <h2>
-              <a href="/[[menuItem.slug]]">
-                <type-writer delay="1000" text="[[menuItem.title]]" speed="80" cursor-duration="3000"></type-writer>
-              </a>
-            </h2>
+      <div>
+        <p>
+          <type-writer delay="1000" text="Howdy, I'm Jam Risser, a full stack software engineer." speed="80" cursor-duration="3000"></type-writer>
+        </p>
+        <div class="menu-items">
+          <div>
+            <template is="dom-repeat" items="[[menuItems]]" as="menuItem">
+              <div class="menu-item">
+                <h2>
+                  <a href="/[[menuItem.slug]]">
+                    <type-writer delay="1000" text="[[menuItem.title]]" speed="80" cursor-duration="3000"></type-writer>
+                  </a>
+                </h2>
+              </div>
+            </template>
           </div>
-        </template>
+        </div>
       </div>
     </div class="content">
 
