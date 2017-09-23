@@ -21,6 +21,16 @@
       .menu-item a {
         color: var(--primary-text-color)
       }
+      .profile-image {
+        text-align: center;
+        margin-bottom: 100px;
+      }
+      .profile-image iron-image {
+        border-radius: 100%;
+        --iron-image-size: 250px;
+        --iron-image-width: var(--iron-image-size);
+        --iron-image-height: var(--iron-image-size);
+      }
     </style>
     <style include="iron-positioning"></style>
 
@@ -28,8 +38,15 @@
       <h1>[[settings.title]]</h1>
     </div>
 
+    Followers [[github.followers]]
+    Repos [[github.public_repos]]
+    Open Source Projects [[github.my_repos]]
+
     <div class="content">
       <div>
+        <div class="profile-image">
+          <iron-image src="https://avatars1.githubusercontent.com/u/6234038?v=4"></iron-image>
+        </div>
         <p>
           <type-writer delay="1000" text="Howdy, I'm Jam Risser, a full stack software engineer." speed="80" cursor-duration="3000"></type-writer>
         </p>
@@ -83,11 +100,41 @@
 
       ready: function() {
         this.set('menuItems', this.getMenuItems());
+        this.setGithubInfo();
       },
 
       attached:  function() {
         this.style.display = 'inline';
         this.playAnimation('entry');
+      },
+
+      setGithubInfo: function() {
+        var themeSettings = app.getThemeSettings();
+        return fetch('https://api.github.com/users/' + themeSettings.githubUser).then((res) => {
+          return res.json();
+        }).then((body) => {
+          this.set('github', body);
+        }).then(() => {
+          return this.getGithubRepos(themeSettings.githubUser).then((repos) => {
+            this.set('github.repos', repos);
+          });
+        }).then(() => {
+          this.set('github.my_repos', _.filter(this.github.repos, (repo) => {
+            return repo.owner.login === themeSettings.githubUser;
+          }).length);
+        });
+      },
+
+      getGithubRepos: function(githubUser, repos, page) {
+        if (!page) page = 1;
+        if (!repos) repos = [];
+        return fetch('https://api.github.com/users/' + githubUser + '/repos?page=' + page).then((res) => {
+          return res.json();
+        }).then((body) => {
+          repos = _.flatten([repos, body]);
+          if (body.length > 0) return this.getGithubRepos(githubUser, repos, ++page);
+          return repos;
+        });
       },
 
       getMenuItems: function() {
