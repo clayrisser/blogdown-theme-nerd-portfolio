@@ -3,16 +3,28 @@
     <style>
       :host {
         display: none;
+        width: 100%;
       }
       .title {
         padding: 10px 40px 0px 40px;
       }
-      .content {
+
+      .body {
         display: flex;
         align-items: center;
+        flex-direction: column;
         justify-content: center;
-        height: calc(100vh - 140px);
         padding: 0px 20px;
+      }
+      .content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 920px;
+        width: 100%;
+      }
+      .intro {
+        text-align: center;
       }
       .menu-items {
         display: flex;
@@ -22,41 +34,110 @@
         color: var(--primary-text-color)
       }
       .profile-image {
-        text-align: center;
-        margin-bottom: 100px;
+        position: relative;
+        left: -60px;
+        top: -60px;
+        width: 180px;
+        height: 180px;
+        animation: pulse 2s 0.2s;
+        transition: all 0.5s ease;
       }
       .profile-image iron-image {
+        z-index: 1;
         border-radius: 100%;
-        --iron-image-size: 250px;
+        --iron-image-size: 100%;
         --iron-image-width: var(--iron-image-size);
         --iron-image-height: var(--iron-image-size);
+      }
+      .profile-image:hover {
+        width: 200px;
+      }
+      .profile-image iron-image:hover {
+        --iron-image-height: var(--iron-image-size);
+      }
+      .github-info paper-card {
+        margin: 60px 0px 20px 0px;
+        max-width: 640px;
+        width: 100%;
+        height: 400px;
+        transition: all 0.5s ease;
+      }
+      .github-info .card-content {
+        display: flex;
+        margin-top: -180px;
+        flex-direction: column;
+        align-items: flex-end;
+      }
+      @media (min-width: 680px) {
+        .github-info paper-card {
+          width: 640px !important;
+        }
+      }
+      .github-info .bio {
+        width: calc(100% - 130px);
+        min-height: 130px;
+      }
+      .github-info .stats {
+        width: 100%;
+      }
+      @keyframes pulse {
+        0% {
+          width: 180px;
+        }
+        50% {
+          width: 200px;
+        }
+        100% {
+          width: 180px;
+        }
       }
     </style>
     <style include="iron-positioning"></style>
 
     <div class="title">
-      <h1>[[settings.title]]</h1>
+      <h1>
+        <type-writer delay="500" text="[[settings.title]]" speed="60"></type-writer>
+      </h1>
     </div>
 
-    Followers [[github.followers]]
-    Repos [[github.public_repos]]
-    Open Source Projects [[github.my_repos]]
-
-    <div class="content">
-      <div>
-        <div class="profile-image">
-          <iron-image src="https://avatars1.githubusercontent.com/u/6234038?v=4"></iron-image>
+    <div class="body">
+      <div class="github-info">
+        <paper-card elevation="2">
+          <div class="profile-image">
+            <a href="/">
+              <iron-image src="https://avatars1.githubusercontent.com/u/6234038?v=4"></iron-image>
+            </a>
+          </div>
+          <div class="card-content">
+            <div class="bio">
+              <p>
+                <type-writer delay="1000" text="[[github.bio]]" speed="20"></type-writer>
+              </p>
+            </div>
+            <div class="stats">
+              <h3>
+                <iron-icon icon="fa:user-plus"></iron-icon> [[github.followers]] Followers
+              </h3>
+              <h3>
+                <iron-icon icon="fa:code"></iron-icon> [[github.my_repos]] Open Source Projects
+              </h3>
+            </div>
+          </div>
+        </paper-card>
+      </div>
+      <div class="content">
+        <div class="intro">
+          <p>
+            <type-writer delay="1000" text="[[themeSettings.intro]]" speed="20"></type-writer>
+          </p>
         </div>
-        <p>
-          <type-writer delay="1000" text="Howdy, I'm Jam Risser, a full stack software engineer." speed="80" cursor-duration="3000"></type-writer>
-        </p>
         <div class="menu-items">
           <div>
             <template is="dom-repeat" items="[[menuItems]]" as="menuItem">
               <div class="menu-item">
                 <h2>
                   <a href="/[[menuItem.slug]]">
-                    <type-writer delay="1000" text="[[menuItem.title]]" speed="80" cursor-duration="3000"></type-writer>
+                    <type-writer delay="1000" text="[[menuItem.title]]" speed="40"></type-writer>
                   </a>
                 </h2>
               </div>
@@ -100,29 +181,35 @@
 
       ready: function() {
         this.set('menuItems', this.getMenuItems());
+        this.set('themeSettings', app.getThemeSettings());
         this.setGithubInfo();
       },
 
       attached:  function() {
-        this.style.display = 'inline';
+        this.style.display = 'inline-block';
         this.playAnimation('entry');
       },
 
       setGithubInfo: function() {
-        var themeSettings = app.getThemeSettings();
-        return fetch('https://api.github.com/users/' + themeSettings.githubUser).then((res) => {
+        if (localStorage.github) {
+          this.set('github', JSON.parse(localStorage.github));
+          return Promise.resolve();
+        }
+        return fetch('https://api.github.com/users/' + this.themeSettings.githubUser).then((res) => {
           return res.json();
         }).then((body) => {
           this.set('github', body);
         }).then(() => {
-          return this.getGithubRepos(themeSettings.githubUser).then((repos) => {
+          return this.getGithubRepos(this.themeSettings.githubUser).then((repos) => {
             this.set('github.repos', repos);
           });
         }).then(() => {
           this.set('github.my_repos', _.filter(this.github.repos, (repo) => {
-            return repo.owner.login === themeSettings.githubUser;
+            return repo.owner.login === this.themeSettings.githubUser;
           }).length);
-        });
+        }).then(() => {
+          localStorage.github = JSON.stringify(this.github);
+        });;
       },
 
       getGithubRepos: function(githubUser, repos, page) {

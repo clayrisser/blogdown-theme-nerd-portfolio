@@ -5,20 +5,40 @@
         display: none;
         width: 100%;
       }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        padding: 0px 40px 0px 40px;
+        align-items: center;
+      }
       .title {
-        padding: 10px 40px 0px 40px;
+        padding-top: 10px;
+      }
+      .body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 0px 40px;
       }
       .content {
-        padding: 0px 20px;
+        margin-top: 40px;
+        max-width: 920px;
+        width: 100%;
       }
     </style>
 
-    <div class="title">
-      <h1>[[page.title]]</h1>
+    <div class="header">
+      <div class="title">
+        <h1>
+          <type-writer delay="500" text="[[page.title]]" speed="60"></type-writer>
+        </h1>
+      </div>
     </div>
 
-    <div class="content">
-      <blogdown-render page="[[page]]"></blogdown-render>
+    <div class="body">
+      <div class="content">
+        <blogdown-render page="[[page]]"></blogdown-render>
+      </div>
     </div>
 
   </template>

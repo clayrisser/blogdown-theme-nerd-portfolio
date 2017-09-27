@@ -9,10 +9,10 @@
         padding: 10px 40px 0px 40px;
       }
       .content {
+        margin-top: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
-        height: calc(100vh - 140px);
         padding: 0px 20px;
       }
       .posts a {
@@ -21,7 +21,9 @@
     </style>
 
     <div class="title">
-      <h1>[[page.title]]</h1>
+      <h1>
+        <type-writer delay="500" text="[[page.title]]" speed="60"></type-writer>
+      </h1>
     </div>
 
     <div class="content">
@@ -30,7 +32,7 @@
           <div class="post">
             <h2>
               <a href="/[[page.slug]]/[[post.slug]]">
-                <type-writer delay="1000" text="[[post.title]]" speed="80" cursor-duration="3000"></type-writer>
+                <type-writer delay="1000" text="[[post.title]]" speed="40"></type-writer>
               </a>
             </h2>
           </div>
@@ -76,7 +78,7 @@
       }
 
       attached() {
-        this.style.display = 'inline';
+        this.style.display = 'inline-block';
         this.playAnimation('entry');
       }
 
